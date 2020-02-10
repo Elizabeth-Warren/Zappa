@@ -327,6 +327,7 @@ class Zappa(object):
             self.dynamodb_client = self.boto_client('dynamodb')
             self.cognito_client = self.boto_client('cognito-idp')
             self.sts_client = self.boto_client('sts')
+            self.ssm_client = self.boto_client('ssm')
 
         self.tags = tags
         self.cf_template = troposphere.Template()
@@ -2068,13 +2069,13 @@ class Zappa(object):
             description_kwargs['LambdaConfig'] = LambdaConfig
 
         # Note
-        # If you set a value for TemporaryPasswordValidityDays in PasswordPolicy , 
+        # If you set a value for TemporaryPasswordValidityDays in PasswordPolicy ,
         # that value will be used and UnusedAccountValidityDays will be deprecated for that user pool.
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp.html#CognitoIdentityProvider.Client.update_user_pool
         # Related: https://github.com/Miserlou/Zappa/issues/1879
         if 'TemporaryPasswordValidityDays' in description_kwargs['Policies']['PasswordPolicy']:
-            description_kwargs['AdminCreateUserConfig'].pop('UnusedAccountValidityDays', None)            
-            
+            description_kwargs['AdminCreateUserConfig'].pop('UnusedAccountValidityDays', None)
+
         result = self.cognito_client.update_user_pool(UserPoolId=user_pool, **description_kwargs)
         if result['ResponseMetadata']['HTTPStatusCode'] != 200:
             print("Cognito:  Failed to update user pool", result)
