@@ -1550,6 +1550,24 @@ class ZappaCLI(object):
         else:
             return True
 
+
+    def perform_environment_variable_replacements(self, environment):
+        """
+        Perform ssm lookups for an environment dictionary
+        """
+        results = {}
+        for (k, v) in environment.items():
+            if v.startswith('ssm:'):
+                name  = v.lstrip('ssm:')
+                value = self.zappa.ssm_client \
+                    .get_parameter(Name=name, WithDecryption=True) \
+                    .get('Parameter', {}).get('Value')
+            else:
+                value = v
+            results[k] = value
+        return results
+
+
     def init(self, settings_file="zappa_settings.json"):
         """
         Initialize a new Zappa project by creating a new zappa_settings.json in a guided process.
@@ -2089,6 +2107,7 @@ class ZappaCLI(object):
         self.lambda_description = self.stage_config.get('lambda_description', "Zappa Deployment")
         self.environment_variables = self.stage_config.get('environment_variables', {})
         self.aws_environment_variables = self.stage_config.get('aws_environment_variables', {})
+        self.aws_environment_variables = self.perform_environment_variable_replacements(self.aws_environment_variables)
         self.check_environment(self.environment_variables)
         self.authorizer = self.stage_config.get('authorizer', {})
         self.runtime = self.stage_config.get('runtime', get_runtime_from_python_version())
