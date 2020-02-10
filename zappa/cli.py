@@ -2134,7 +2134,12 @@ class ZappaCLI(object):
                             xray_tracing=self.xray_tracing
                         )
 
+        # Perform environment variable replacement for both the aws_environment_variables
+        # and the injected environment_variables
         self.aws_environment_variables = self.perform_environment_variable_replacements(self.aws_environment_variables)
+        self.check_environment(self.aws_environment_variables)
+
+        self.environment_variables = self.perform_environment_variable_replacements(self.environment_variables)
         self.check_environment(self.environment_variables)
 
         for setting in CUSTOM_SETTINGS:
