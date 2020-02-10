@@ -2107,8 +2107,6 @@ class ZappaCLI(object):
         self.lambda_description = self.stage_config.get('lambda_description', "Zappa Deployment")
         self.environment_variables = self.stage_config.get('environment_variables', {})
         self.aws_environment_variables = self.stage_config.get('aws_environment_variables', {})
-        self.aws_environment_variables = self.perform_environment_variable_replacements(self.aws_environment_variables)
-        self.check_environment(self.environment_variables)
         self.authorizer = self.stage_config.get('authorizer', {})
         self.runtime = self.stage_config.get('runtime', get_runtime_from_python_version())
         self.aws_kms_key_arn = self.stage_config.get('aws_kms_key_arn', '')
@@ -2135,6 +2133,9 @@ class ZappaCLI(object):
                             endpoint_urls=self.stage_config.get('aws_endpoint_urls',{}),
                             xray_tracing=self.xray_tracing
                         )
+
+        self.aws_environment_variables = self.perform_environment_variable_replacements(self.aws_environment_variables)
+        self.check_environment(self.environment_variables)
 
         for setting in CUSTOM_SETTINGS:
             if setting in self.stage_config:
